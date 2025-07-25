@@ -1,0 +1,33 @@
+name: ElementalLogin
+version: 1.0.0
+main: com.securelogin.SecureLogin
+api-version: 1.16
+depend: [ProtocolLib, ElementalCores]
+authors: WarriorPlayz
+description: A secure login system with advanced inventory hiding
+
+commands:
+  register:
+    description: Register a new account
+    usage: /register <password>
+  login:
+    description: Log in to your account
+    usage: /login <password>
+  logout:
+    description: Log out of your account
+    usage: /logout
+  changepassword:
+    description: Change your password
+    usage: /changepassword <old password> <new password>
+  unregister:
+    description: Delete your account
+    usage: /unregister <password>
+  loginadmin:
+    description: Admin commands for account management
+    usage: /loginadmin <reset|unregister|forcelogin|reload> [player] [password]
+    permission: login.admin
+
+permissions:
+  login.admin:
+    description: Allows access to admin commands
+    default: op
