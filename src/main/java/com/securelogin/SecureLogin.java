@@ -428,3 +428,252 @@ public class SecureLogin extends JavaPlugin implements Listener {
         
         // Send login message
         if (isRegistered(player.getUniqueId())) {
+                    player.sendMessage(ChatColor.YELLOW + getMessage("login-required"));
+        } else {
+            player.sendMessage(ChatColor.YELLOW + getMessage("registration-required"));
+        }
+    }
+    
+    public void removeLoginRestrictions(Player player) {
+        // Remove potion effects
+        player.removePotionEffect(PotionEffectType.BLINDNESS);
+        player.removePotionEffect(PotionEffectType.SLOW);
+        
+        // Set back to survival if that's the server default
+        if (getServer().getDefaultGameMode() == GameMode.SURVIVAL) {
+            player.setGameMode(GameMode.SURVIVAL);
+        }
+        
+        // Refresh inventory
+        player.updateInventory();
+        
+        // Welcome message
+        player.sendMessage(ChatColor.GREEN + getMessage("login-success"));
+    }
+    
+    public int incrementLoginAttempt(UUID uuid) {
+        int attempts = loginAttempts.getOrDefault(uuid, 0) + 1;
+        loginAttempts.put(uuid, attempts);
+        return attempts;
+    }
+    
+    public void resetLoginAttempts(UUID uuid) {
+        loginAttempts.remove(uuid);
+    }
+    
+    public String getMessage(String key) {
+        return getConfig().getString("messages." + key, "Message not found: " + key);
+    }
+    
+    public String hashPassword(String password, String salt) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(salt.getBytes());
+            byte[] bytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            getLogger().log(Level.SEVERE, "Failed to hash password!", e);
+            return null;
+        }
+    }
+    
+    public String generateSalt() {
+        return UUID.randomUUID().toString();
+    }
+    
+    // ========== EVENT LISTENERS ==========
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        
+        // Apply login restrictions
+        applyLoginRestrictions(player);
+        
+        // Check if auto-login is enabled with IP
+        if (getConfig().getBoolean("session.ip-auto-login", false)) {
+            // Implement IP-based auto-login if needed
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        
+        // Clean up player data
+        resetLoginAttempts(player.getUniqueId());
+        
+        // Log the player out
+        if (isLoggedIn(player.getUniqueId())) {
+            setLoggedIn(player, false);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            // Allow looking around but not moving
+            if (event.getFrom().getBlockX() != event.getTo().getBlockX() ||
+                event.getFrom().getBlockY() != event.getTo().getBlockY() ||
+                event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            event.setCancelled(true);
+            player.sendMessage(ChatColor.RED + getMessage("cannot-chat"));
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
+        String command = event.getMessage().split(" ")[0].toLowerCase();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            // Allow only login-related commands
+            if (!command.equals("/login") && !command.equals("/register")) {
+                event.setCancelled(true);
+                player.sendMessage(ChatColor.RED + getMessage("cannot-use-commands"));
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player) {
+            Player player = (Player) event.getWhoClicked();
+            
+            if (!isLoggedIn(player.getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInventoryOpen(InventoryOpenEvent event) {
+        if (event.getPlayer() instanceof Player) {
+            Player player = (Player) event.getPlayer();
+            
+            if (!isLoggedIn(player.getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            
+            if (!isLoggedIn(player.getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onEntityTarget(EntityTargetEvent event) {
+        if (event.getTarget() instanceof Player) {
+            Player player = (Player) event.getTarget();
+            
+            if (!isLoggedIn(player.getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if (event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            
+            if (!isLoggedIn(player.getUniqueId())) {
+                event.setCancelled(true);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerPickupItem(PlayerPickupItemEvent event) {
+        Player player = event.getPlayer();
+        
+        if (!isLoggedIn(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+    
+    // ========== INNER CLASSES ==========
+    
+    // Simple UserData class
+    public static class UserData {
+        private final UUID uuid;
+        private String passwordHash;
+        private String salt;
+        
+        public UserData(UUID uuid, String passwordHash, String salt) {
+            this.uuid = uuid;
+            this.passwordHash = passwordHash;
+            this.salt = salt;
+        }
+        
+        public UUID getUuid() {
+            return uuid;
+        }
+        
+        public String getPasswordHash() {
+            return passwordHash;
+        }
+        
+        public void setPasswordHash(String passwordHash) {
+            this.passwordHash = passwordHash;
+        }
+        
+        public String getSalt() {
+            return salt;
+        }
+        
+        public void setSalt(String salt) {
+            this.salt = salt;
+        }
+    }
+}
