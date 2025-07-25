@@ -19,7 +19,7 @@ A secure login system with advanced inventory hiding for Minecraft servers.
 
 ## Installation
 
-1. Download the latest release from the [Releases](https://github.com/yourusername/SecureLogin/releases) page
+1. Download the latest release from the [Releases](https://github.com/Ayanishaqq/Elemetal-Login) page
 2. Place the JAR file in your server's `plugins` folder
 3. Restart your server
 4. Edit the configuration file as needed
