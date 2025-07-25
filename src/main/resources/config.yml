@@ -1,0 +1,52 @@
+# SecureLogin Configuration
+
+# General settings
+general:
+  allow-unregister: true
+  
+# Security settings
+security:
+  min-password-length: 4
+  max-login-attempts: 5
+  ban-on-max-attempts: false
+  ban-time: "1h"  # Format: 1d = 1 day, 1h = 1 hour, 1m = 1 minute
+
+# Session settings
+session:
+  timeout-minutes: 60  # Set to 0 to disable timeout
+  ip-auto-login: false
+  
+# Messages
+messages:
+  login-required: "Please log in using /login <password>"
+  registration-required: "Please register using /register <password>"
+  already-registered: "You are already registered!"
+  already-logged-in: "You are already logged in!"
+  not-registered: "You are not registered! Use /register <password>"
+  not-logged-in: "You are not logged in! Use /login <password>"
+  register-usage: "Usage: /register <password>"
+  login-usage: "Usage: /login <password>"
+  changepass-usage: "Usage: /changepassword <old password> <new password>"
+  unregister-usage: "Usage: /unregister <password>"
+  password-too-short: "Password must be at least %min% characters long!"
+  register-success: "Successfully registered! You are now logged in."
+  register-fail: "Failed to register! Please try again."
+  login-success: "Successfully logged in!"
+  login-fail: "Wrong password! Attempt %attempts%/%max%"
+  logout-success: "Successfully logged out!"
+  changepass-success: "Password changed successfully!"
+  changepass-fail: "Failed to change password! Please try again."
+  old-password-wrong: "Your old password is incorrect!"
+  unregister-success: "Your account has been unregistered."
+  unregister-fail: "Failed to unregister your account! Please try again."
+  unregister-disabled: "Account unregistration is disabled on this server."
+  unregister-wrong-password: "Wrong password! Your account was not unregistered."
+  cannot-chat: "You must be logged in to chat!"
+  cannot-use-commands: "You must be logged in to use commands!"
+  no-permission: "You don't have permission to use this command!"
+  kicked-too-many-attempts: "Too many failed login attempts! Please try again later."
+  banned-too-many-attempts: "You have been banned for too many failed login attempts!"
+  session-timeout: "Your session has timed out. Please log in again."
+  admin-reset-password: "An admin has reset your password. Please log in again."
+  admin-unregistered: "An admin has unregistered your account."
+  admin-force-login: "An admin has logged you in."
