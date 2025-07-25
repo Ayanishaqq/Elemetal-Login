@@ -1,25 +1,28 @@
-name: Java CI with Maven
+name: Build ElementalCores Plugin  # Name of the workflow (shows in GitHub Actions tab)
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
+on:  # When to run the workflow
+  push:  # Run on every push to the main branch
+    branches: [ main ]  # Change to 'master' if your branch is named that
+  pull_request:  # Also run on pull requests (optional, for reviews)
     branches: [ main ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v3
-      with:
-        java-version: 1.8
-    
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+jobs:  # The tasks to run
+  build:  # Job name
+    runs-on: ubuntu-latest  # Run on a GitHub-hosted Linux machine (free)
+
+    steps:  # Sequence of steps
+      - name: Checkout code  # Step 1: Download your repo code
+        uses: actions/checkout@v4  # Official action to clone the repo
+
+      - name: Set up JDK 17  # Step 2: Install Java 17 (matches your pom.xml)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'  # Java version
+          distribution: 'temurin'  # Free JDK provider
+          cache: maven  # Cache Maven dependencies for faster builds
+
+      - name: Build with Maven  # Step 3: Run Maven to build the .jar
+        run: mvn clean install  # Same as what you do in IntelliJ
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
